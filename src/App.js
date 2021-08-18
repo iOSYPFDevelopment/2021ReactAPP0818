@@ -2,7 +2,7 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react'
-//我都很无语了
+//我都很无语了 头大
 function App() {
   return (
     <div className="App">
