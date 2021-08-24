@@ -123,10 +123,10 @@ function App() {
         <button style ={{height:40}} onClick={createNote}>Create Product</button>
       </div >
 
-      <div style={{marginBottom: 100}}>
+      <view style={{marginBottom: 100}}>
         {
           notes.map(note => (
-            <div key={note.id || note.productNo}>
+            <view key={note.id || note.productNo}>
               
               <div>
                 <h2>{note.productChName}</h2>
@@ -142,10 +142,11 @@ function App() {
               </div>
 
 
-          </div>
+          </view>
         ))
       }
-      </div >
+      </view >
+
       <AmplifySignOut/>
     </div>
   );
