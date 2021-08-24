@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { API, Storage } from 'aws-amplify';
+import { API, sectionFooterPrimaryContent, Storage } from 'aws-amplify';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
 import { listNotes } from './graphql/queries';
 import { createNote as createNoteMutation, deleteNote as deleteNoteMutation } from './graphql/mutations';
 
-const initialFormState = { name: '', description: '',productChName:'',productNo:'',productEnName:'',productSize:'' }
+const initialFormState = {productChName:'',productNo:'',productEnName:'',productSize:'' }
 var imageArrayName = []
 function App() {
   const [notes, setNotes] = useState([]);
@@ -38,8 +38,9 @@ function App() {
     await Promise.all(notesFromAPI.map(async note => {
       console.log("测试存储数据图片image     " +note.image)
       if (note.image) {
-        const image = await Storage.get(note.image);
-        note.image = image;
+        var myobj = eval(note.image);
+        const image = await Storage.get(myobj[0]);
+        note.image = "https://2021reactapp0818a8cb7d7dcbdf4d99a2f6e7e64270337152331-dev.s3.ap-northeast-1.amazonaws.com/public/"+myobj[0];
       }
       return note;
     }))
@@ -47,23 +48,38 @@ function App() {
   }
   //上传数据啊啊
   async function createNote() {
-    // if (!formData.name || !formData.description) return;
-    // console.log("图       "+formData.image)
+
+    if(!formData.productChName || !formData.productEnName || !formData.productNo || !formData.productSize || !formData.image){
+
+      alert("请完善产品信息");
+      return;
+
+    }
     
     await API.graphql({ query: createNoteMutation, variables: { input: formData } });
 
     //查看上传数据结果
-    var imageArray = []
+
     if (formData.image) {
-      for(var i = 0;i<formData.image.length;i++){
-        const image = await Storage.get(formData.image[i]);
-        imageArray.push(image);   
-        console.log("图jieguo 前3333       "+image)
-      }
-      formData.image = imageArray;
+      const image = await Storage.get(formData.image);
+      formData.image = image;
+    }
+
+    // var imageArray = []
+    if (formData.image) {
+      // for(var i = 0;i<formData.image.length;i++){
+      //   const image = await Storage.get(formData.image[i]);
+      //   imageArray.push(image);   
+      //   console.log("图jieguo 前3333       "+image)
+      // }
+
+      const image = await Storage.get(formData.image);
+      formData.image = "https://2021reactapp0818a8cb7d7dcbdf4d99a2f6e7e64270337152331-dev.s3.ap-northeast-1.amazonaws.com/public/"+imageArrayName[0];;
     }
 
     setNotes([ ...notes, formData ]);
+
+    
     setFormData(initialFormState);
   }
   async function deleteNote({ id }) {
@@ -73,37 +89,28 @@ function App() {
   }
   return (
     <div className="App">
-      <h1>潮牌 产品数据上传</h1>
-      {/* <input style ={{height:40}}
-        onChange={e => setFormData({ ...formData, 'name': e.target.value})}
-        placeholder="Product name"
-        value={formData.name}
-      />
-      <input style ={{height:40,marginLeft:10}}
-        onChange={e => setFormData({ ...formData, 'description': e.target.value})}
-        placeholder="Product description"
-        value={formData.description}
-      /> */}
+      <h1>Ananke 潮牌产品上传</h1>
+      
 
       <input style ={{height:40,marginLeft:10}}
         onChange={e => setFormData({ ...formData, 'productChName': e.target.value})}
-        placeholder="Product productChName"
+        placeholder="ProductChName"
         value={formData.productChName}
       />
       <input style ={{height:40,marginLeft:10}}
         onChange={e => setFormData({ ...formData, 'productEnName': e.target.value})}
-        placeholder="Product productEnName"
+        placeholder="ProductEnName"
         value={formData.productEnName}
       />
 
       <input style ={{height:40,marginLeft:10}}
         onChange={e => setFormData({ ...formData, 'productNo': e.target.value})}
-        placeholder="Product productNo"
+        placeholder="ProductNo"
         value={formData.productNo}
       />
       <input style ={{height:40,marginLeft:10}}
         onChange={e => setFormData({ ...formData, 'productSize': e.target.value})}
-        placeholder="Product productSize"
+        placeholder="ProductSize"
         value={formData.productSize}
       />
 
@@ -120,20 +127,25 @@ function App() {
         {
           notes.map(note => (
             <div key={note.id || note.productNo}>
-              <h2>{note.productChName}</h2>
+              
+              <div>
+                <h2>{note.productChName}</h2>
+              </div>
+
               <p>{note.productNo}</p>
-              <button onClick={() => deleteNote(note)}>Delete note</button>
-            {
-              // note.image && <img src={note.image} style={{width: 400}} />
-        }
+              
+              {
+                note.image && <img src={note.image} style={{width: 400,backgroundColor:'blue'}} />
+              }
+              <div style={{height:50}}>
+                <button  onClick={() => deleteNote(note)}>Delete product</button>
+              </div>
+
+
           </div>
         ))
       }
       </div >
-
-
-      
-
       <AmplifySignOut/>
     </div>
   );
